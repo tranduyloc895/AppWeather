@@ -12,7 +12,7 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  final ApiService _apiService = ApiService('http://10.0.2.2:8000/api');
+  final ApiService _apiService = ApiService('http://3.107.212.93/api');
   final _sessionManager = SessionManager();
 
   @override

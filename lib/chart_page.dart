@@ -13,7 +13,7 @@ class ChartPage extends StatefulWidget {
 }
 
 class _ChartPageState extends State<ChartPage> {
-  final ApiService _apiService = ApiService('http://10.0.2.2:8000/api');
+  final ApiService _apiService = ApiService('http://3.107.212.93/api');
 
   DateTime? _startDate = DateTime.now().subtract(Duration(days: 7));
   DateTime? _endDate = DateTime.now();
@@ -100,8 +100,20 @@ class _ChartPageState extends State<ChartPage> {
         endDate: endDateStr,
       );
       
+      // Sort the data by timestamp in ascending order
+      final sortedData = List<Map<String, dynamic>>.from(data)
+        ..sort((a, b) {
+          final timestampA = a['timestamp'] is int 
+              ? a['timestamp'] 
+              : DateTime.parse(a['timestamp'].toString()).millisecondsSinceEpoch ~/ 1000;
+          final timestampB = b['timestamp'] is int 
+              ? b['timestamp'] 
+              : DateTime.parse(b['timestamp'].toString()).millisecondsSinceEpoch ~/ 1000;
+          return timestampA.compareTo(timestampB);
+        });
+      
       setState(() {
-        _weatherData = List<Map<String, dynamic>>.from(data);
+        _weatherData = sortedData;
         _updatePressureUnit(); // Update pressure unit after fetching data
       });
     } catch (e) {
@@ -561,4 +573,4 @@ class _ChartPageState extends State<ChartPage> {
       ),
     );
   }
-} 
+}

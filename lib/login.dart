@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
-  final ApiService _apiService = ApiService('http://10.0.2.2:8000/api');
+  final ApiService _apiService = ApiService('http://3.107.212.93/api');
   final _sessionManager = SessionManager();
 
   @override
