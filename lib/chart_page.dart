@@ -337,20 +337,20 @@ class _ChartPageState extends State<ChartPage> {
                 String displayValue;
                  if (_selectedSensor == 'pressure') {
                   final actualValue = value * _pressureScale + 100000;
-                   if (_pressureUnit == 'hPa'){
-                     displayValue = actualValue.toStringAsFixed(0); // hPa usually integers
-                   } else if (_pressureUnit == 'kPa'){
-                      displayValue = actualValue.toStringAsFixed(1); // kPa can have one decimal
-                   } else { // MPa
-                      displayValue = actualValue.toStringAsFixed(2); // MPa can have two decimals
-                   }
-                 } else { // Temperature or Humidity
-                   displayValue = value.toStringAsFixed(1); // Default to one decimal for other sensors
-                 }
+                  displayValue = actualValue.toStringAsFixed(0); // Always show integer for pressure
+                } else { // Temperature or Humidity
+                  displayValue = value.toStringAsFixed(1); // Keep one decimal for temp/humidity
+                }
 
-                return Text(
-                  displayValue,
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                return SizedBox(
+                  width: 60, // Tăng width để đủ chỗ cho 6 số
+                  child: Text(
+                    displayValue,
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.visible, // Đảm bảo không bị cắt
+                    softWrap: false, // Không tự động xuống dòng
+                  ),
                 );
               },
               reservedSize: 42,
@@ -379,6 +379,26 @@ class _ChartPageState extends State<ChartPage> {
             ),
           ),
         ],
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: Colors.blueGrey.shade700,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((spot) {
+                String valueStr;
+                if (_selectedSensor == 'pressure') {
+                  final actualValue = spot.y * _pressureScale + 100000;
+                  valueStr = actualValue.toStringAsFixed(0); // Áp suất luôn dương
+                } else {
+                  valueStr = spot.y.toStringAsFixed(1);
+                }
+                return LineTooltipItem(
+                  valueStr,
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                );
+              }).toList();
+            },
+          ),
+        ),
       ),
     );
   }
@@ -386,142 +406,129 @@ class _ChartPageState extends State<ChartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent, // Ensure background is transparent
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF6DD5FA),
-              Color(0xFF2980F2),
-              Color(0xFF8F6ED5),
+              Color(0xFF6DD5FA), // Light blue
+              Color(0xFF2980F2), // Blue
+              Color(0xFF8F6ED5), // Purple
             ],
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(16.0),
+            child: ListView( // Wrap the Column with ListView for scrollability
               children: [
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.show_chart, color: Colors.white, size: 32),
-                    SizedBox(width: 10),
-                    Text(
-                      'Statistics',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.1,
-                        shadows: [Shadow(color: Colors.black26, blurRadius: 8)],
-                      ),
+                    Row(
+                      children: [
+                        Icon(Icons.show_chart, color: Colors.white, size: 32),
+                        SizedBox(width: 10),
+                        Text(
+                          'Statistics',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                            shadows: [Shadow(color: Colors.black26, blurRadius: 8)],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedSensor,
-                        decoration: _modernInputDecoration('Sensor Type'),
-                        items: [
-                          DropdownMenuItem(value: 'temperature', child: Text('Temperature')),
-                          DropdownMenuItem(value: 'humidity', child: Text('Humidity')),
-                          DropdownMenuItem(value: 'pressure', child: Text('Pressure')),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedSensor = value;
-                            });
-                          }
-                        },
-                        dropdownColor: Colors.blue[400],
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _pickDate(isStart: true),
-                        child: AbsorbPointer(
-                          child: TextFormField(
-                            decoration: _modernInputDecoration('Start Date'),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedSensor,
+                            decoration: _modernInputDecoration('Sensor Type'),
+                            items: [
+                              DropdownMenuItem(value: 'temperature', child: Text('Temperature')),
+                              DropdownMenuItem(value: 'humidity', child: Text('Humidity')),
+                              DropdownMenuItem(value: 'pressure', child: Text('Pressure')),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedSensor = value;
+                                });
+                              }
+                            },
+                            dropdownColor: Colors.blue[400],
                             style: TextStyle(color: Colors.white),
-                            readOnly: true,
-                            controller: TextEditingController(text: _formatDate(_startDate)),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _pickDate(isStart: false),
-                        child: AbsorbPointer(
-                          child: TextFormField(
-                            decoration: _modernInputDecoration('End Date'),
-                            style: TextStyle(color: Colors.white),
-                            readOnly: true,
-                            controller: TextEditingController(text: _formatDate(_endDate)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: _glassCard(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: _buildChart(),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _fetchWeatherData,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          elevation: 6,
-                        ),
+                    const SizedBox(height: 12),
+                    // Row for date pickers - Replaced with _buildDatePickerRow()
+                    _buildDatePickerRow(), // Using the dedicated row builder
+                    const SizedBox(height: 20),
+                    // Wrap the chart card with a SizedBox to give it a fixed height
+                    SizedBox(
+                      height: 360, // Tăng chiều cao
+                      width: double.infinity, // Tăng chiều rộng tối đa theo parent
+                      child: _glassCard(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: _isLoading
-                              ? SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[900]!),
-                                  ),
-                                )
-                              : Text(
-                                  'SHOW CHART',
-                                  style: TextStyle(
-                                    color: Colors.blue[900],
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                          padding: const EdgeInsets.all(24.0), // Tăng padding cho đẹp
+                          child: _buildChart(),
                         ),
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _fetchWeatherData,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              elevation: 6,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: _isLoading
+                                  ? SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[900]!),
+                                      ),
+                                    )
+                                  : Text(
+                                      'SHOW CHART',
+                                      style: TextStyle(
+                                        color: Colors.blue[900],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_errorMessage.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        child: Text(
+                          _errorMessage,
+                          style: TextStyle(color: Colors.redAccent, fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                   ],
                 ),
               ],
@@ -529,6 +536,40 @@ class _ChartPageState extends State<ChartPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDatePickerRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _pickDate(isStart: true),
+            child: AbsorbPointer(
+              child: TextFormField(
+                decoration: _modernInputDecoration('Start Date'),
+                style: TextStyle(color: Colors.white),
+                readOnly: true,
+                controller: TextEditingController(text: _formatDate(_startDate)),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _pickDate(isStart: false),
+            child: AbsorbPointer(
+              child: TextFormField(
+                decoration: _modernInputDecoration('End Date'),
+                style: TextStyle(color: Colors.white),
+                readOnly: true,
+                controller: TextEditingController(text: _formatDate(_endDate)),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

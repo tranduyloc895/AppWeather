@@ -74,45 +74,45 @@ class _AssetDetailPageState extends State<AssetDetailPage> {
                     ? Center(child: Text(_errorMessage, style: TextStyle(color: Colors.red[300]), textAlign: TextAlign.center))
                     : _weatherData.isEmpty
                         ? Center(child: Text('No data available', style: TextStyle(color: Colors.white70), textAlign: TextAlign.center))
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        : SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: MediaQuery.of(context).size.height - 100, // Adjust based on padding/appbar height
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'Latest Weather Data',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.1,
-                                      shadows: [
-                                        Shadow(color: Colors.black26, blurRadius: 8),
-                                      ],
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Latest Weather Data',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.1,
+                                          shadows: [
+                                            Shadow(color: Colors.black26, blurRadius: 8),
+                                          ],
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Icon(Icons.cloud, color: Colors.white, size: 36),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildWeatherDataDisplay(_weatherData.last),
+                                  const SizedBox(height: 16),
+                                  _glassCard(
+                                    child: Text(
+                                      _getWeatherStatus(_weatherData.last['pred']),
+                                      style: TextStyle(color: Colors.white, fontSize: 17),
                                     ),
                                   ),
-                                  Spacer(),
-                                  Icon(Icons.cloud, color: Colors.white, size: 36),
+                                  const SizedBox(height: 16),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              _buildWeatherDataDisplay(_weatherData.last),
-                              const SizedBox(height: 16),
-                              _glassCard(
-                                child: Text(
-                                  _getWeatherStatus(_weatherData.last['pred']),
-                                  style: TextStyle(color: Colors.white, fontSize: 17),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Expanded(
-                                child: ListView(
-                                  children: [
-                                    // These will be built by _buildWeatherDataDisplay
-                                  ],
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
           ),
         ),

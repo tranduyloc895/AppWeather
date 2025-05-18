@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weatherapp/login.dart';
 import 'api_service.dart';
 import 'main_screen.dart';
 
@@ -18,7 +19,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
-  final ApiService _apiService = ApiService('http://10.0.2.2:8000/api'); 
+  final ApiService _apiService = ApiService('http://3.107.212.93/api'); 
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
@@ -48,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
           
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MainScreen()),
+            MaterialPageRoute(builder: (context) => LoginPage()),
           );
         }
       } catch (e) {
